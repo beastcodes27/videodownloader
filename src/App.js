@@ -23,8 +23,8 @@ function App() {
     setLoading(false);
   };
 
-  const handleDownload = (itag) => {
-    window.open(`http://localhost:4000/api/download?url=${encodeURIComponent(url)}&itag=${itag}`, '_blank');
+  const handleDownload = (formatId) => {
+    window.open(`http://localhost:4000/api/download?url=${encodeURIComponent(url)}&formatId=${formatId}`, '_blank');
   };
 
   const formatDuration = (s) => {
@@ -68,7 +68,7 @@ function App() {
             <h3>Available Formats</h3>
             <div className="formats">
               {info.formats.map((f, i) => (
-                <div key={i} className="format-card" onClick={() => handleDownload(f.itag)}>
+                <div key={i} className="format-card" onClick={() => handleDownload(f.formatId)}>
                   <div className="format-info">
                     <span className="quality">{f.quality}</span>
                     <span className="meta">
@@ -76,7 +76,7 @@ function App() {
                       {!f.hasVideo && f.hasAudio && '🎵 Audio only'}
                       {f.hasVideo && f.hasAudio && '🎬 Video + Audio'}
                     </span>
-                    <span className="container">{f.container}</span>
+                    <span className="container">{f.ext}</span>
                   </div>
                   <button className="download-btn">Download</button>
                 </div>
