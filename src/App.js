@@ -6,6 +6,7 @@ function App() {
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tab, setTab] = useState('video');
 
   const fetchInfo = async () => {
     if (!url.trim()) return;
@@ -54,6 +55,26 @@ function App() {
 
         {error && <p className="error">{error}</p>}
 
+        {loading && (
+          <div className="skeleton">
+            <div className="skeleton-preview">
+              <div className="skeleton-thumb shimmer" />
+              <div className="skeleton-details">
+                <div className="skeleton-line shimmer w-80" />
+                <div className="skeleton-line shimmer w-50" />
+                <div className="skeleton-line shimmer w-30" />
+              </div>
+            </div>
+            <div className="skeleton-tabs">
+              <div className="skeleton-tab shimmer" />
+              <div className="skeleton-tab shimmer" />
+            </div>
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="skeleton-format shimmer" />
+            ))}
+          </div>
+        )}
+
         {info && (
           <div className="video-card">
             <div className="video-preview">
@@ -66,8 +87,14 @@ function App() {
             </div>
 
             <h3>Available Formats</h3>
+            <div className="tabs">
+              <button className={`tab ${tab === 'video' ? 'active' : ''}`} onClick={() => setTab('video')}>Video</button>
+              <button className={`tab ${tab === 'audio' ? 'active' : ''}`} onClick={() => setTab('audio')}>Audio</button>
+            </div>
             <div className="formats">
-              {info.formats.map((f, i) => (
+              {info.formats
+                .filter(f => tab === 'video' ? f.hasVideo : (!f.hasVideo && f.hasAudio))
+                .map((f, i) => (
                 <div key={i} className="format-card" onClick={() => handleDownload(f.formatId)}>
                   <div className="format-info">
                     <span className="quality">{f.quality}</span>
