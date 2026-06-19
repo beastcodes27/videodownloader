@@ -13,7 +13,7 @@ function App() {
     setError('');
     setInfo(null);
     try {
-      const res = await fetch(`http://localhost:4000/api/info?url=${encodeURIComponent(url)}`);
+      const res = await fetch(`/api/info?url=${encodeURIComponent(url)}`);
       const data = await res.json();
       if (data.error) setError(data.error);
       else setInfo(data);
@@ -24,7 +24,7 @@ function App() {
   };
 
   const handleDownload = (formatId) => {
-    window.open(`http://localhost:4000/api/download?url=${encodeURIComponent(url)}&formatId=${formatId}`, '_blank');
+    window.open(`/api/download?url=${encodeURIComponent(url)}&formatId=${formatId}`, '_blank');
   };
 
   const formatDuration = (s) => {
