@@ -49,7 +49,7 @@ function App() {
             onKeyDown={(e) => e.key === 'Enter' && fetchInfo()}
           />
           <button onClick={fetchInfo} disabled={loading}>
-            {loading ? 'Fetching...' : 'Get Video'}
+            {loading ? <span className="spinner" /> : 'Get Video'}
           </button>
         </div>
 
