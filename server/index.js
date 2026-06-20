@@ -52,18 +52,18 @@ app.get('/api/download', (req, res) => {
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
     const tmpDir = fs.mkdtempSync(path.join(__dirname, 'dl-'));
-    const outPath = path.join(tmpDir, 'output.mp4');
+    const outTmpl = path.join(tmpDir, '%(title)s.%(ext)s');
 
     let format;
-    let filename;
+    let label;
 
     if (formatId) {
       format = formatId;
-      filename = 'audio';
+      label = 'audio';
     } else if (quality) {
       const height = quality.replace('p', '');
       format = `bestvideo[height<=${height}]+bestaudio/best[height<=${height}]`;
-      filename = `video-${quality}`;
+      label = quality;
     } else {
       fs.rmSync(tmpDir, { recursive: true, force: true });
       return res.status(400).json({ error: 'quality or formatId required' });
@@ -72,22 +72,31 @@ app.get('/api/download', (req, res) => {
     const proc = spawn('yt-dlp', [
       '-f', format,
       '--ffmpeg-location', ffmpegPath,
-      '-o', outPath,
+      '-o', outTmpl,
       '--no-part',
       '--no-progress',
       '--merge-output-format', 'mp4',
+      '--print', 'after_move:filename',
       url,
     ]);
 
+    let output = '';
     let errorOutput = '';
+    proc.stdout.on('data', (chunk) => { output += chunk.toString(); });
     proc.stderr.on('data', (chunk) => { errorOutput += chunk.toString(); });
 
     proc.on('close', (code) => {
-      if (code !== 0 || !fs.existsSync(outPath)) {
+      if (code !== 0) {
         fs.rmSync(tmpDir, { recursive: true, force: true });
         return res.status(500).json({ error: `Download failed: ${errorOutput.slice(0, 300)}` });
       }
-      res.download(outPath, `${filename}.mp4`, (err) => {
+      const files = fs.readdirSync(tmpDir);
+      if (files.length === 0) {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+        return res.status(500).json({ error: 'File not found after download' });
+      }
+      const filePath = path.join(tmpDir, files[0]);
+      res.download(filePath, (err) => {
         fs.rmSync(tmpDir, { recursive: true, force: true });
         if (err) console.error('Send error:', err);
       });
