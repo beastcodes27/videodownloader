@@ -5,6 +5,7 @@ function App() {
   const [url, setUrl] = useState('');
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(null);
   const [error, setError] = useState('');
   const [tab, setTab] = useState('video');
 
@@ -24,9 +25,19 @@ function App() {
     setLoading(false);
   };
 
-  const handleDownload = (formatId) => {
-    window.open(`/api/download?url=${encodeURIComponent(url)}&formatId=${formatId}`, '_blank');
+  const handleDownload = (quality, formatId) => {
+    const params = formatId ? `formatId=${formatId}` : `quality=${quality}`;
+    setDownloading(quality || formatId);
+    const a = document.createElement('a');
+    a.href = `/api/download?url=${encodeURIComponent(url)}&${params}`;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => setDownloading(null), 3000);
   };
+
+  const videoQualities = ['360p', '480p', '720p', '1080p', '1440p', '2160p'];
 
   const formatDuration = (s) => {
     const m = Math.floor(s / 60);
@@ -34,13 +45,33 @@ function App() {
     return `${m}:${sec.toString().padStart(2, '0')}`;
   };
 
+  const formatSize = (bytes) => {
+    if (!bytes) return '';
+    const mb = (bytes / 1024 / 1024).toFixed(1);
+    return `${mb} MB`;
+  };
+
   return (
     <div className="app">
       <div className="container">
-        <h1 className="title">SaveVideo</h1>
-        <p className="subtitle">Download YouTube videos in any format</p>
+        <div className="header">
+          <div className="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+            <h1 className="title">SaveVideo</h1>
+          </div>
+          <p className="subtitle">Download YouTube videos in any format</p>
+        </div>
 
         <div className="search-box">
+          <div className="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
           <input
             type="text"
             placeholder="Paste YouTube URL here..."
@@ -53,7 +84,16 @@ function App() {
           </button>
         </div>
 
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <div className="error">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            {error}
+          </div>
+        )}
 
         {loading && (
           <div className="skeleton">
@@ -81,33 +121,93 @@ function App() {
               <img src={info.thumbnail} alt={info.title} />
               <div className="video-details">
                 <h2>{info.title}</h2>
-                <p className="author">{info.author}</p>
-                <p className="duration">{formatDuration(info.duration)}</p>
+                <div className="meta-row">
+                  <span className="author">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    {info.author}
+                  </span>
+                  <span className="duration">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {formatDuration(info.duration)}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <h3>Available Formats</h3>
             <div className="tabs">
-              <button className={`tab ${tab === 'video' ? 'active' : ''}`} onClick={() => setTab('video')}>Video</button>
-              <button className={`tab ${tab === 'audio' ? 'active' : ''}`} onClick={() => setTab('audio')}>Audio</button>
+              <button className={`tab ${tab === 'video' ? 'active' : ''}`} onClick={() => setTab('video')}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="23 7 16 12 23 17 23 7" />
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                </svg>
+                Video
+              </button>
+              <button className={`tab ${tab === 'audio' ? 'active' : ''}`} onClick={() => setTab('audio')}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+                Audio
+              </button>
             </div>
+
             <div className="formats">
-              {info.formats
-                .filter(f => tab === 'video' ? f.hasVideo : (!f.hasVideo && f.hasAudio))
-                .map((f, i) => (
-                <div key={i} className="format-card" onClick={() => handleDownload(f.formatId)}>
-                  <div className="format-info">
-                    <span className="quality">{f.quality}</span>
-                    <span className="meta">
-                      {f.hasVideo && !f.hasAudio && '🎬 Video only'}
-                      {!f.hasVideo && f.hasAudio && '🎵 Audio only'}
-                      {f.hasVideo && f.hasAudio && '🎬 Video + Audio'}
-                    </span>
-                    <span className="container">{f.ext}</span>
+              {tab === 'video' ? (
+                videoQualities.map((q, i) => (
+                  <div key={i} className={`format-card ${downloading === q ? 'downloading' : ''}`} onClick={() => handleDownload(q)}>
+                    <div className="format-info">
+                      <div className="quality-badge">{q}</div>
+                      <div className="format-meta">
+                        <span className="format-label">Video + Audio</span>
+                        <span className="format-ext">mp4</span>
+                      </div>
+                    </div>
+                    <button className="download-btn">
+                      {downloading === q ? (
+                        <span className="btn-spinner" />
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
-                  <button className="download-btn">Download</button>
-                </div>
-              ))}
+                ))
+              ) : (
+                info.formats
+                  .filter(f => !f.hasVideo && f.hasAudio)
+                  .map((f, i) => (
+                  <div key={i} className={`format-card ${downloading === f.formatId ? 'downloading' : ''}`} onClick={() => handleDownload(null, f.formatId)}>
+                    <div className="format-info">
+                      <div className="quality-badge audio">{f.quality}</div>
+                      <div className="format-meta">
+                        <span className="format-label">Audio only</span>
+                        <span className="format-ext">{f.ext} {formatSize(f.filesize)}</span>
+                      </div>
+                    </div>
+                    <button className="download-btn">
+                      {downloading === f.formatId ? (
+                        <span className="btn-spinner" />
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
