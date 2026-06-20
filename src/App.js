@@ -28,14 +28,13 @@ function App() {
   const handleDownload = (quality, formatId) => {
     const params = formatId ? `formatId=${formatId}` : `quality=${quality}`;
     setDownloading(quality || formatId);
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = `/api/download?url=${encodeURIComponent(url)}&${params}`;
-    form.target = '_blank';
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    setTimeout(() => setDownloading(null), 12000);
+    const a = document.createElement('a');
+    a.href = `/api/download?url=${encodeURIComponent(url)}&${params}`;
+    a.download = `${quality || 'audio'}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => setDownloading(null), 15000);
   };
 
   const videoQualities = ['360p', '480p', '720p', '1080p', '1440p', '2160p'];

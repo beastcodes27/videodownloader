@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, '..', 'build')));
+
 app.get('/api/info', (req, res) => {
   try {
     const { url } = req.query;
@@ -93,11 +95,17 @@ app.get('/api/download', (req, res) => {
 
     req.on('close', () => {
       proc.kill();
-      setTimeout(() => fs.rmSync(tmpDir, { recursive: true, force: true }), 5000);
+      setTimeout(() => {
+        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+      }, 5000);
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
