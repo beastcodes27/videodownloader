@@ -28,14 +28,14 @@ function App() {
   const handleDownload = (quality, formatId) => {
     const params = formatId ? `formatId=${formatId}` : `quality=${quality}`;
     setDownloading(quality || formatId);
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = `/api/download?url=${encodeURIComponent(url)}&${params}`;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-      setDownloading(null);
-    }, 5000);
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = `/api/download?url=${encodeURIComponent(url)}&${params}`;
+    form.target = '_blank';
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    setTimeout(() => setDownloading(null), 12000);
   };
 
   const videoQualities = ['360p', '480p', '720p', '1080p', '1440p', '2160p'];
