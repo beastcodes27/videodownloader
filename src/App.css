@@ -116,6 +116,52 @@ body {
   gap: 8px;
 }
 
+.platform-menu {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.platform-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.platform-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.platform-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.platform-btn.active:first-child svg {
+  color: #ff0000;
+}
+
+.platform-btn.active:last-child svg {
+  color: #25f4ee;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

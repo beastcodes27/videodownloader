@@ -74,8 +74,12 @@ app.get('/api/download', (req, res) => {
       format = formatId;
       label = 'audio';
     } else if (quality) {
-      const height = quality.replace('p', '');
-      format = `bestvideo[height<=${height}]+bestaudio/best[height<=${height}]`;
+      if (isTikTok(url)) {
+        format = `best[height<=${quality.replace('p', '')}]`;
+      } else {
+        const height = quality.replace('p', '');
+        format = `bestvideo[height<=${height}]+bestaudio/best[height<=${height}]`;
+      }
       label = quality;
     } else {
       fs.rmSync(tmpDir, { recursive: true, force: true });
