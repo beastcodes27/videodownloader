@@ -38,6 +38,7 @@ function App() {
   };
 
   const videoQualities = ['360p', '480p', '720p', '1080p', '1440p', '2160p'];
+  const tiktokQualities = ['540p', '720p'];
 
   const formatDuration = (s) => {
     const m = Math.floor(s / 60);
@@ -60,9 +61,9 @@ function App() {
               <polygon points="23 7 16 12 23 17 23 7" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
-            <h1 className="title">SaveVideo</h1>
-          </div>
-          <p className="subtitle">Download YouTube videos in any format</p>
+          <h1 className="title">SaveVideo</h1>
+           </div>
+           <p className="subtitle">Download videos from YouTube & TikTok</p>
         </div>
 
         <div className="search-box">
@@ -74,7 +75,7 @@ function App() {
           </div>
           <input
             type="text"
-            placeholder="Paste YouTube URL here..."
+            placeholder="Paste YouTube or TikTok URL here..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && fetchInfo()}

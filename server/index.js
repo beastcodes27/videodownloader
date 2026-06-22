@@ -13,6 +13,9 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, '..', 'build')));
 
+const isTikTok = (url) =>
+  /tiktok\.com/i.test(url) || /vm\.tiktok/i.test(url);
+
 app.get('/api/info', (req, res) => {
   try {
     const { url } = req.query;
@@ -24,15 +27,24 @@ app.get('/api/info', (req, res) => {
     });
     const data = JSON.parse(raw);
 
-    const formats = (data.formats || []).map(f => ({
-      formatId: f.format_id,
-      quality: f.format_note || f.resolution || f.abr || 'unknown',
-      ext: f.ext,
-      hasVideo: f.vcodec && f.vcodec !== 'none',
-      hasAudio: f.acodec && f.acodec !== 'none',
-      filesize: f.filesize || f.filesize_approx || null,
-      tbr: f.tbr,
-    }));
+    const tik = isTikTok(url);
+
+    const formats = (data.formats || []).map(f => {
+      let quality = f.format_note || f.resolution || f.abr || 'unknown';
+      if (tik && !quality || quality === 'None') {
+        const m = f.format_id.match(/_(\d+p)_/);
+        quality = m ? m[1] : f.resolution || 'unknown';
+      }
+      return {
+        formatId: f.format_id,
+        quality,
+        ext: f.ext,
+        hasVideo: f.vcodec && f.vcodec !== 'none',
+        hasAudio: f.acodec && f.acodec !== 'none',
+        filesize: f.filesize || f.filesize_approx || null,
+        tbr: f.tbr,
+      };
+    });
 
     res.json({
       title: data.title,
@@ -40,6 +52,7 @@ app.get('/api/info', (req, res) => {
       duration: data.duration,
       author: data.uploader || data.channel,
       formats,
+      isTikTok: tik,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
