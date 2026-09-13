@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsOfService from './TermsOfService';
 import VideoPlayerModal from './VideoPlayerModal';
+import DownloadHistory from './DownloadHistory';
 import './App.css';
 
 function App() {
@@ -15,9 +16,59 @@ function App() {
   const [page, setPage] = useState('home');
   const [activeFaq, setActiveFaq] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [history, setHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem('saveit_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('saveit_theme') || 'light';
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('saveit_history', JSON.stringify(history));
+    } catch (e) {
+      console.error('Failed to save history', e);
+    }
+  }, [history]);
+
+  const addToHistory = (item) => {
+    setHistory((prev) => {
+      const existing = prev.find((x) => x.url === item.url);
+      const filtered = prev.filter((x) => x.url !== item.url);
+      const newItem = {
+        ...item,
+        id: existing?.id || Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        bookmarked: existing ? existing.bookmarked : false,
+      };
+      return [newItem, ...filtered].slice(0, 50);
+    });
+  };
+
+  const toggleBookmark = (idOrUrl) => {
+    setHistory((prev) =>
+      prev.map((item) =>
+        item.id === idOrUrl || item.url === idOrUrl
+          ? { ...item, bookmarked: !item.bookmarked }
+          : item
+      )
+    );
+  };
+
+  const removeHistoryItem = (idOrUrl) => {
+    setHistory((prev) => prev.filter((item) => item.id !== idOrUrl && item.url !== idOrUrl));
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -126,6 +177,13 @@ function App() {
         setError(data.error || 'Failed to fetch content info');
       } else {
         setInfo(data);
+        addToHistory({
+          url: cleanUrl,
+          title: data.title || cleanUrl,
+          thumbnail: data.thumbnail || (data.images && data.images[0]?.url) || '',
+          platform: data.platform || platform || 'universal',
+          duration: data.duration || 0,
+        });
         if (data.isImageOnly || (!data.videoFormats?.length && data.images?.length > 0)) {
           setTab('photos');
         } else {
@@ -247,6 +305,21 @@ function App() {
           </div>
 
           <div className="nav-actions">
+            <button
+              className="nav-action-btn"
+              onClick={() => setShowHistoryModal(true)}
+              title="Download History & Bookmarks"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>History</span>
+              {history.length > 0 && (
+                <span className="nav-count-badge">{history.length}</span>
+              )}
+            </button>
+
             <button
               className="theme-btn"
               onClick={toggleTheme}
@@ -680,6 +753,19 @@ function App() {
               onClose={() => setShowPreviewModal(false)}
             />
           )}
+
+          <DownloadHistory
+            isOpen={showHistoryModal}
+            history={history}
+            onClose={() => setShowHistoryModal(false)}
+            onSelectUrl={(selectedUrl) => {
+              setUrl(selectedUrl);
+              fetchInfoForUrl(selectedUrl);
+            }}
+            onClearHistory={clearHistory}
+            onRemoveItem={removeHistoryItem}
+            onToggleBookmark={toggleBookmark}
+          />
         </div>
       </main>
     </div>
