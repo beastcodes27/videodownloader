@@ -40,8 +40,11 @@ app.use(express.static(path.join(__dirname, '..', 'build')));
 app.get('/api/info', async (req, res) => {
   try {
     const { url } = req.query;
-    if (!url) {
-      return res.status(400).json({ error: 'URL is required' });
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'URL parameter is required' });
+    }
+    if (url.length > 2048) {
+      return res.status(400).json({ error: 'URL is too long (max 2048 characters)' });
     }
 
     const info = await fetchInfo(url);
@@ -59,8 +62,11 @@ app.get('/api/download', async (req, res) => {
 
   try {
     const { url, quality, formatId, mode } = req.query;
-    if (!url) {
-      return res.status(400).json({ error: 'URL is required' });
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'URL parameter is required' });
+    }
+    if (url.length > 2048) {
+      return res.status(400).json({ error: 'URL is too long (max 2048 characters)' });
     }
 
     const isAudioMode = mode === 'audio' || Boolean(formatId && formatId.startsWith('mp3_')) || formatId === 'source_audio';
