@@ -251,8 +251,8 @@ app.get('*', (req, res) => {
 });
 
 ensureYtDlpBinary().then(() => {
-  app.listen(PORT, () => console.log(`SaveVideo server running on http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`SaveIt server running on http://localhost:${PORT}`));
 }).catch((err) => {
   console.warn('Startup binary check warning:', err.message);
-  app.listen(PORT, () => console.log(`SaveVideo server running on http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`SaveIt server running on http://localhost:${PORT}`));
 });

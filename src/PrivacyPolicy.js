@@ -19,7 +19,7 @@ export default function PrivacyPolicy({ onBack }) {
         <section className="policy-section">
           <h2>1. Introduction</h2>
           <p>
-            Welcome to SaveVideo. We respect your privacy and are committed to protecting your personal data.
+            Welcome to SaveIt. We respect your privacy and are committed to protecting your personal data.
             This Privacy Policy explains how our service operates, what information is processed when you use our video,
             audio, and media download service, and your rights regarding data privacy.
           </p>
@@ -28,7 +28,7 @@ export default function PrivacyPolicy({ onBack }) {
         <section className="policy-section">
           <h2>2. Information We Do Not Collect</h2>
           <p>
-            SaveVideo is designed to operate with minimal data collection:
+            SaveIt is designed to operate with minimal data collection:
           </p>
           <ul>
             <li>We do <strong>not</strong> require user registration, accounts, or personal information (such as names, email addresses, or passwords).</li>
@@ -58,14 +58,14 @@ export default function PrivacyPolicy({ onBack }) {
         <section className="policy-section">
           <h2>5. Third-Party Links & Platforms</h2>
           <p>
-            Our service processes content from third-party platforms (including YouTube, TikTok, Facebook, Instagram, Twitter/X, and direct media sources). When using SaveVideo, media streams are requested directly from the corresponding third-party servers. We encourage users to review the privacy policies and terms of those external platforms.
+            Our service processes content from third-party platforms (including YouTube, TikTok, Facebook, Instagram, Twitter/X, and direct media sources). When using SaveIt, media streams are requested directly from the corresponding third-party servers. We encourage users to review the privacy policies and terms of those external platforms.
           </p>
         </section>
 
         <section className="policy-section">
           <h2>6. Cookies & Local Storage</h2>
           <p>
-            SaveVideo does not use tracking or advertising cookies. Any client-side storage (such as UI theme or preferred tabs) is saved strictly within your browser's local state and is never transmitted to third parties.
+            SaveIt does not use tracking or advertising cookies. Any client-side storage (such as UI theme or preferred tabs) is saved strictly within your browser's local state and is never transmitted to third parties.
           </p>
         </section>
 
@@ -86,10 +86,9 @@ export default function PrivacyPolicy({ onBack }) {
 
       <div className="policy-footer-action">
         <button className="back-btn-primary" onClick={onBack}>
-          Return to SaveVideo Downloader
+          Return to SaveIt Downloader
         </button>
       </div>
     </div>
   );
 }
-

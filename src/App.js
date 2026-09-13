@@ -14,12 +14,12 @@ function App() {
   const [page, setPage] = useState('home');
   const [activeFaq, setActiveFaq] = useState(null);
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('savevideo_theme') || 'light';
+    return localStorage.getItem('saveit_theme') || 'light';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('savevideo_theme', theme);
+    localStorage.setItem('saveit_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -192,12 +192,12 @@ function App() {
 
   const faqs = [
     {
-      q: 'How do I download videos using SaveVideo?',
+      q: 'How do I download videos using SaveIt?',
       a: 'Simply copy the video URL from YouTube, TikTok, Facebook, or Instagram, paste it into the search box above, and click "Download". Select your preferred quality and format to save it directly to your device.'
     },
     {
-      q: 'Is SaveVideo free to use?',
-      a: 'Yes, SaveVideo is 100% free with unlimited downloads. There are no registrations, paywalls, or download limits.'
+      q: 'Is SaveIt free to use?',
+      a: 'Yes, SaveIt is 100% free with unlimited downloads. There are no registrations, paywalls, or download limits.'
     },
     {
       q: 'What video and audio formats are supported?',
@@ -208,8 +208,8 @@ function App() {
       a: 'Files are automatically saved to your browser\'s default "Downloads" folder on Windows, Mac, Android, and iOS.'
     },
     {
-      q: 'Does SaveVideo store or keep copies of downloaded videos?',
-      a: 'No. SaveVideo does not host or store any media on our servers. All downloads are fetched ephemerally in real-time from source servers directly to your browser and immediately wiped.'
+      q: 'Does SaveIt store or keep copies of downloaded videos?',
+      a: 'No. SaveIt does not host or store any media on our servers. All downloads are fetched ephemerally in real-time from source servers directly to your browser and immediately wiped.'
     }
   ];
 
@@ -226,7 +226,7 @@ function App() {
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
             </div>
-            <span className="brand-name">ss<span className="brand-highlight">video</span></span>
+            <span className="brand-name">Save<span className="brand-highlight">It</span></span>
           </div>
 
           <div className="nav-actions">
@@ -622,8 +622,8 @@ function App() {
               <footer className="site-footer">
                 <div className="footer-top">
                   <div className="footer-brand">
-                    <span className="brand-name-sm">ss<span className="brand-highlight">video</span></span>
-                    <p className="footer-tagline">Fast & Free Online Media Downloader</p>
+                    <span className="brand-name-sm">Save<span className="brand-highlight">It</span></span>
+                    <p className="footer-tagline">Fast & Free Online Video, Audio & Photo Downloader</p>
                   </div>
                   <div className="footer-nav">
                     <button className="fnav-link" onClick={() => navigateTo('privacy')}>Privacy Policy</button>
@@ -632,9 +632,9 @@ function App() {
                 </div>
                 <div className="footer-bottom">
                   <p className="disclaimer-txt">
-                    Disclaimer: SaveVideo does not host or store copyrighted media. All media streams are delivered directly from third-party platforms.
+                    Disclaimer: SaveIt does not host or store copyrighted media. All media streams are delivered directly from third-party platforms.
                   </p>
-                  <p className="copyright-txt">© 2026 SSVideo Downloader. All rights reserved.</p>
+                  <p className="copyright-txt">© 2026 SaveIt. All rights reserved.</p>
                 </div>
               </footer>
             </>
