@@ -1,70 +1,107 @@
-# Getting Started with Create React App
+# SaveIt - Online Video, Audio & Media Downloader
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<p align="center">
+  <img src="public/logo192.png" width="80" height="80" alt="SaveIt Logo" />
+</p>
 
-## Available Scripts
+SaveIt is a fast, modern, and reliable online media downloader inspired by SSYouTube. It enables users to download high-definition videos (up to 4K), extract high-bitrate MP3 audio (up to 320 kbps), and download photos and slideshows from various social platforms with zero ads or paywalls.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Multi-Platform Support**: Download from **YouTube** (Videos, Shorts, Music), **TikTok** (Without watermark & Photo mode), **Facebook** (Reels & Videos), **Instagram** (Posts & Reels), **Twitter/X**, and direct media links.
+- **Dynamic Format Selection**:
+  - **Video**: 4K (2160p), 2K (1440p), 1080p Full HD, 720p HD, 480p, 360p (MP4).
+  - **Audio**: MP3 320 kbps (High Quality), 192 kbps (Standard), 128 kbps (Compact), and Source Audio.
+  - **Photos**: Direct high-res photo downloads and TikTok/Instagram slideshow extractions.
+- **SSYouTube-Inspired UI**:
+  - Clean light theme by default with a built-in Dark Mode toggle.
+  - One-click clipboard **Paste** button.
+  - Responsive layout optimized for smartphones, tablets, and desktops.
+  - Step-by-step guide, supported platform badges, and interactive FAQ accordion.
+- **Resilient Engine**:
+  - Standalone `yt-dlp` integration with automatic binary management.
+  - Non-blocking asynchronous child process execution.
+  - Automatic `ffmpeg` stream transcoding and container merging.
+  - Automatic transient temp file cleanup.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🚀 Quick Start
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Prerequisites
+- [Node.js](https://nodejs.org/) (v16 or newer)
+- [npm](https://www.npmjs.com/)
 
-### `npm run build`
+### 2. Installation
+```bash
+# Clone the repository
+git clone https://github.com/beastcodes27/videodownloader.git
+cd videodownloader
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Install dependencies
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 3. Run Development Server
+```bash
+# Start frontend React development server (runs on port 3000)
+npm start
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# In a separate terminal, start backend Express API server (runs on port 4000)
+node server/index.js
+```
 
-### `npm run eject`
+### 4. Build for Production
+```bash
+# Compile optimized React production bundle
+npm run build
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Run the complete production server (serves build assets & API on port 4000)
+node server/index.js
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📡 API Endpoints
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 1. `GET /api/info?url=<media_url>`
+Extracts metadata, available video resolutions, audio bitrates, and photo streams.
+```json
+{
+  "title": "Example Video Title",
+  "thumbnail": "https://...",
+  "duration": 215,
+  "author": "Creator Name",
+  "platform": "youtube",
+  "videoFormats": [
+    { "quality": "1080p", "label": "1080p Full HD", "ext": "mp4", "filesize": 45123000 }
+  ],
+  "audioOptions": [
+    { "formatId": "mp3_320", "label": "MP3 - High Quality (320 kbps)", "quality": "320kbps" }
+  ],
+  "images": [
+    { "url": "https://...", "label": "Cover Image (Original)", "ext": "jpg" }
+  ]
+}
+```
 
-## Learn More
+### 2. `GET /api/download?url=<media_url>&quality=<quality>&mode=<video|audio>`
+Downloads and streams the combined MP4 video or transcoded MP3 audio file.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 3. `GET /api/download-image?url=<image_url>&filename=<filename>`
+Fetches and downloads photos, slideshows, or high-res thumbnails with sanitized Content-Disposition headers.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 📄 Privacy & Legal
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+SaveIt processes media URLs ephemerally in real-time. Media files are delivered directly from third-party host servers and are **not** hosted or permanently stored on our infrastructure. All temporary files are immediately purged after download completion.
 
-### Analyzing the Bundle Size
+See our [Privacy Policy](src/PrivacyPolicy.js) and [Terms of Service](src/TermsOfService.js) for full details.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 📜 License
+MIT License © 2026 SaveIt.
