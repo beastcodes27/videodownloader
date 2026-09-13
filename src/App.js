@@ -27,7 +27,7 @@ function App() {
   const fetchInfo = async () => {
     const cleanUrl = sanitizeInputUrl(url);
     if (!cleanUrl) {
-      setError('Please enter a valid video or audio URL');
+      setError('Please enter a valid video, audio, or image URL');
       return;
     }
 
@@ -61,11 +61,13 @@ function App() {
       const res = await fetch(`/api/info?url=${encodeURIComponent(cleanUrl)}`);
       const data = await res.json();
       if (!res.ok || data.error) {
-        setError(data.error || 'Failed to fetch video info');
+        setError(data.error || 'Failed to fetch content info');
       } else {
         setInfo(data);
-        if (data.platform && data.platform !== 'generic' && platform === 'auto') {
-          // optionally align platform indicator
+        if (data.isImageOnly || (!data.videoFormats?.length && data.images?.length > 0)) {
+          setTab('photos');
+        } else {
+          setTab('video');
         }
       }
     } catch (err) {
@@ -98,6 +100,22 @@ function App() {
     setTimeout(() => setDownloading(null), 12000);
   };
 
+  const handleDownloadImage = (img, index) => {
+    const downloadKey = img.url;
+    setDownloading(downloadKey);
+
+    const a = document.createElement('a');
+    const safeTitle = (info?.title || 'photo').slice(0, 40).replace(/[^\w\d-_]/g, '_');
+    const filename = `${safeTitle}_photo_${index + 1}`;
+    a.href = `/api/download-image?url=${encodeURIComponent(img.url)}&filename=${encodeURIComponent(filename)}`;
+    a.download = `${filename}.${img.ext || 'jpg'}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => setDownloading(null), 8000);
+  };
+
   const formatDuration = (s) => {
     if (!s || isNaN(s)) return '0:00';
     const hrs = Math.floor(s / 3600);
@@ -124,9 +142,9 @@ function App() {
               <polygon points="23 7 16 12 23 17 23 7" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
-            <h1 className="title">SaveVideo</h1>
+            <h1 className="title">SaveVideo & Media</h1>
           </div>
-          <p className="subtitle">High-speed, stable video and audio downloader</p>
+          <p className="subtitle">Download videos, audios, and photos in any format</p>
         </div>
 
         <div className="platform-menu">
@@ -183,10 +201,10 @@ function App() {
               platform === 'youtube'
                 ? 'Paste YouTube link (video, shorts, music)...'
                 : platform === 'tiktok'
-                ? 'Paste TikTok video link...'
+                ? 'Paste TikTok link (video, photo slideshow)...'
                 : platform === 'facebook'
-                ? 'Paste Facebook video or reel link...'
-                : 'Paste any video/audio URL (YouTube, TikTok, Facebook, Reels, etc)...'
+                ? 'Paste Facebook video, photo, or reel link...'
+                : 'Paste any video, audio, or photo URL (YouTube, TikTok, Facebook, Instagram, direct image)...'
             }
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -244,7 +262,7 @@ function App() {
               {info.thumbnail ? (
                 <img src={info.thumbnail} alt={info.title} />
               ) : (
-                <div className="no-thumbnail">Video</div>
+                <div className="no-thumbnail">Media</div>
               )}
               <div className="video-details">
                 <h2>{info.title}</h2>
@@ -273,25 +291,39 @@ function App() {
             </div>
 
             <div className="tabs">
-              <button className={`tab ${tab === 'video' ? 'active' : ''}`} onClick={() => setTab('video')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="23 7 16 12 23 17 23 7" />
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                </svg>
-                Video ({info.videoFormats ? info.videoFormats.length : 0})
-              </button>
-              <button className={`tab ${tab === 'audio' ? 'active' : ''}`} onClick={() => setTab('audio')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18V5l12-2v13" />
-                  <circle cx="6" cy="18" r="3" />
-                  <circle cx="18" cy="16" r="3" />
-                </svg>
-                Audio ({info.audioOptions ? info.audioOptions.length : 0})
-              </button>
+              {info.videoFormats && info.videoFormats.length > 0 && (
+                <button className={`tab ${tab === 'video' ? 'active' : ''}`} onClick={() => setTab('video')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="23 7 16 12 23 17 23 7" />
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                  </svg>
+                  Video ({info.videoFormats.length})
+                </button>
+              )}
+              {info.audioOptions && info.audioOptions.length > 0 && (
+                <button className={`tab ${tab === 'audio' ? 'active' : ''}`} onClick={() => setTab('audio')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18V5l12-2v13" />
+                    <circle cx="6" cy="18" r="3" />
+                    <circle cx="18" cy="16" r="3" />
+                  </svg>
+                  Audio ({info.audioOptions.length})
+                </button>
+              )}
+              {info.images && info.images.length > 0 && (
+                <button className={`tab ${tab === 'photos' ? 'active' : ''}`} onClick={() => setTab('photos')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  Photos ({info.images.length})
+                </button>
+              )}
             </div>
 
             <div className="formats">
-              {tab === 'video' ? (
+              {tab === 'video' && (
                 info.videoFormats && info.videoFormats.length > 0 ? (
                   info.videoFormats.map((f, i) => (
                     <div
@@ -325,7 +357,9 @@ function App() {
                 ) : (
                   <div className="no-formats">No video streams found</div>
                 )
-              ) : (
+              )}
+
+              {tab === 'audio' && (
                 info.audioOptions && info.audioOptions.length > 0 ? (
                   info.audioOptions.map((a, i) => (
                     <div
@@ -357,6 +391,45 @@ function App() {
                   ))
                 ) : (
                   <div className="no-formats">No audio streams found</div>
+                )
+              )}
+
+              {tab === 'photos' && (
+                info.images && info.images.length > 0 ? (
+                  info.images.map((img, i) => (
+                    <div
+                      key={i}
+                      className={`format-card photo-card ${downloading === img.url ? 'downloading' : ''}`}
+                      onClick={() => handleDownloadImage(img, i)}
+                    >
+                      <div className="photo-preview-item">
+                        <img src={img.url} alt={img.label} />
+                      </div>
+                      <div className="format-info">
+                        <div className="quality-badge photo">{img.ext ? img.ext.toUpperCase() : 'JPG'}</div>
+                        <div className="format-meta">
+                          <span className="format-label">{img.label}</span>
+                          <span className="format-ext">
+                            {img.width && img.height ? `${img.width}x${img.height} • ` : ''}
+                            High Resolution Image
+                          </span>
+                        </div>
+                      </div>
+                      <button className="download-btn">
+                        {downloading === img.url ? (
+                          <span className="btn-spinner" />
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-formats">No photo/image streams found</div>
                 )
               )}
             </div>

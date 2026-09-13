@@ -107,9 +107,66 @@ function sanitizeUrl(rawUrl) {
   }
 }
 
+const IMAGE_EXT_REGEX = /\.(jpg|jpeg|png|webp|gif|svg|bmp|tiff|avif)(\?.*)?$/i;
+
+function isDirectImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  return IMAGE_EXT_REGEX.test(url.trim());
+}
+
+function handleDirectImage(url) {
+  const cleanUrl = sanitizeUrl(url);
+  try {
+    const parsed = new URL(cleanUrl);
+    const pathname = parsed.pathname;
+    const extMatch = pathname.match(/\.(jpg|jpeg|png|webp|gif|svg|bmp|avif)$/i);
+    const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+    const baseName = path.basename(pathname) || 'image';
+
+    return {
+      title: decodeURIComponent(baseName).replace(/\.[^/.]+$/, '') || 'Photo',
+      thumbnail: cleanUrl,
+      duration: 0,
+      author: parsed.hostname,
+      platform: 'image',
+      videoFormats: [],
+      audioOptions: [],
+      images: [
+        {
+          url: cleanUrl,
+          label: `Original Image (${ext.toUpperCase()})`,
+          ext,
+        }
+      ],
+      originalUrl: cleanUrl,
+      isImageOnly: true,
+    };
+  } catch {
+    return {
+      title: 'Photo',
+      thumbnail: cleanUrl,
+      duration: 0,
+      author: 'Direct Link',
+      platform: 'image',
+      videoFormats: [],
+      audioOptions: [],
+      images: [
+        {
+          url: cleanUrl,
+          label: 'Original Image',
+          ext: 'jpg',
+        }
+      ],
+      originalUrl: cleanUrl,
+      isImageOnly: true,
+    };
+  }
+}
+
 // Identify video platform
 function detectPlatform(url) {
   const u = url.toLowerCase();
+  if (isDirectImageUrl(url)) return 'image';
   if (/youtube\.com|youtu\.be/i.test(u)) return 'youtube';
   if (/tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(u)) return 'tiktok';
   if (/facebook\.com|fb\.watch|fb\.com|fb\.gg/i.test(u)) return 'facebook';
@@ -126,6 +183,12 @@ function detectPlatform(url) {
 function fetchInfo(url, timeoutMs = 45000) {
   return new Promise((resolve, reject) => {
     const cleanUrl = sanitizeUrl(url);
+
+    // If direct image URL, resolve directly
+    if (isDirectImageUrl(cleanUrl)) {
+      return resolve(handleDirectImage(cleanUrl));
+    }
+
     const ytDlp = getYtDlpPath();
 
     const args = [
@@ -284,6 +347,54 @@ function fetchInfo(url, timeoutMs = 45000) {
           });
         }
 
+        // Extract photo slideshows, carousel images, and high-res cover photos
+        const images = [];
+        const seenImageUrls = new Set();
+
+        // 1. Slideshow / carousel entries (e.g. TikTok photos, multi-image posts)
+        if (Array.isArray(data.entries) && data.entries.length > 0) {
+          data.entries.forEach((entry, idx) => {
+            const imgUrl = entry.url || entry.thumbnail || (entry.thumbnails && entry.thumbnails[entry.thumbnails.length - 1]?.url);
+            if (imgUrl && !seenImageUrls.has(imgUrl)) {
+              seenImageUrls.add(imgUrl);
+              images.push({
+                url: imgUrl,
+                label: `Photo ${idx + 1}`,
+                ext: 'jpg',
+                width: entry.width || null,
+                height: entry.height || null,
+              });
+            }
+          });
+        }
+
+        // 2. High resolution thumbnails / covers
+        if (Array.isArray(data.thumbnails)) {
+          const sortedThumbs = [...data.thumbnails].reverse();
+          for (const t of sortedThumbs) {
+            if (t.url && !seenImageUrls.has(t.url)) {
+              seenImageUrls.add(t.url);
+              const resLabel = t.height && t.width ? `${t.width}x${t.height}` : (t.resolution || 'High Quality');
+              images.push({
+                url: t.url,
+                label: `Cover Image (${resLabel})`,
+                ext: 'jpg',
+                width: t.width || null,
+                height: t.height || null,
+              });
+            }
+          }
+        } else if (data.thumbnail && !seenImageUrls.has(data.thumbnail)) {
+          seenImageUrls.add(data.thumbnail);
+          images.push({
+            url: data.thumbnail,
+            label: 'Cover Image (Original)',
+            ext: 'jpg',
+            width: null,
+            height: null,
+          });
+        }
+
         resolve({
           title: data.title || 'video',
           thumbnail: data.thumbnail || (data.thumbnails && data.thumbnails[0] ? data.thumbnails[0].url : ''),
@@ -292,6 +403,7 @@ function fetchInfo(url, timeoutMs = 45000) {
           platform,
           videoFormats,
           audioOptions,
+          images,
           originalUrl: cleanUrl,
         });
       } catch (parseErr) {
@@ -352,5 +464,6 @@ module.exports = {
   buildDownloadArgs,
   sanitizeUrl,
   detectPlatform,
+  isDirectImageUrl,
 };
 
