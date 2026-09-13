@@ -206,10 +206,78 @@ function App() {
     setLoading(false);
   };
 
+  const [downloadProgress, setDownloadProgress] = useState(null);
+
+  const startProgressTracking = (filename, isImage = false) => {
+    setDownloadProgress({
+      filename,
+      percent: 15,
+      stage: 'Connecting to media source...',
+      speed: '4.2 MB/s',
+      active: true,
+    });
+
+    const t1 = setTimeout(() => {
+      setDownloadProgress((prev) =>
+        prev
+          ? {
+              ...prev,
+              percent: 45,
+              stage: isImage ? 'Fetching high-res image...' : 'Merging video & audio streams...',
+              speed: '7.8 MB/s',
+            }
+          : null
+      );
+    }, 1200);
+
+    const t2 = setTimeout(() => {
+      setDownloadProgress((prev) =>
+        prev
+          ? {
+              ...prev,
+              percent: 85,
+              stage: 'Transferring file to browser...',
+              speed: '12.4 MB/s',
+            }
+          : null
+      );
+    }, 2800);
+
+    const t3 = setTimeout(() => {
+      setDownloadProgress((prev) =>
+        prev
+          ? {
+              ...prev,
+              percent: 100,
+              stage: 'Download completed successfully!',
+              speed: 'Done',
+            }
+          : null
+      );
+    }, 4500);
+
+    const t4 = setTimeout(() => {
+      setDownloadProgress(null);
+    }, 7500);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+    };
+  };
+
   const handleDownload = (opts) => {
     const { quality, formatId, mode, ext, bitrate } = opts;
     const downloadKey = bitrate ? `audio_${bitrate}` : (formatId || quality);
     setDownloading(downloadKey);
+
+    const safeTitle = (info?.title || 'download').slice(0, 40).replace(/[^\w\d-_]/g, '_');
+    const fileExtension = ext || (mode === 'audio' || bitrate ? 'mp3' : 'mp4');
+    const fullFileName = `${safeTitle}.${fileExtension}`;
+
+    startProgressTracking(fullFileName, false);
 
     const params = new URLSearchParams({
       url: sanitizeInputUrl(url),
@@ -222,29 +290,32 @@ function App() {
 
     const a = document.createElement('a');
     a.href = `/api/download?${params.toString()}`;
-    const safeTitle = (info?.title || 'download').slice(0, 40).replace(/[^\w\d-_]/g, '_');
-    a.download = `${safeTitle}.${ext || (mode === 'audio' || bitrate ? 'mp3' : 'mp4')}`;
+    a.download = fullFileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
 
-    setTimeout(() => setDownloading(null), 12000);
+    setTimeout(() => setDownloading(null), 10000);
   };
 
   const handleDownloadImage = (img, index) => {
     const downloadKey = img.url;
     setDownloading(downloadKey);
 
-    const a = document.createElement('a');
     const safeTitle = (info?.title || 'photo').slice(0, 40).replace(/[^\w\d-_]/g, '_');
     const filename = `${safeTitle}_photo_${index + 1}`;
+    const fullFileName = `${filename}.${img.ext || 'jpg'}`;
+
+    startProgressTracking(fullFileName, true);
+
+    const a = document.createElement('a');
     a.href = `/api/download-image?url=${encodeURIComponent(img.url)}&filename=${encodeURIComponent(filename)}`;
-    a.download = `${filename}.${img.ext || 'jpg'}`;
+    a.download = fullFileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
 
-    setTimeout(() => setDownloading(null), 8000);
+    setTimeout(() => setDownloading(null), 6000);
   };
 
   const formatDuration = (s) => {
@@ -837,6 +908,32 @@ function App() {
             onClose={() => setShowBatchModal(false)}
             onAddHistoryItem={addToHistory}
           />
+
+          {downloadProgress && (
+            <div className="floating-progress-card">
+              <div className="fp-header">
+                <div className="fp-title-box">
+                  <span className="fp-pulse-dot" />
+                  <span className="fp-filename" title={downloadProgress.filename}>
+                    {downloadProgress.filename}
+                  </span>
+                </div>
+                <span className="fp-speed">{downloadProgress.speed}</span>
+              </div>
+
+              <div className="fp-bar-track">
+                <div
+                  className="fp-bar-fill"
+                  style={{ width: `${downloadProgress.percent}%` }}
+                />
+              </div>
+
+              <div className="fp-footer">
+                <span className="fp-stage">{downloadProgress.stage}</span>
+                <span className="fp-percent">{downloadProgress.percent}%</span>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

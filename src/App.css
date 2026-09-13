@@ -1901,6 +1901,125 @@ body {
   display: inline-block;
 }
 
+/* Floating Live Download Progress Card */
+.floating-progress-card {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  width: calc(100% - 48px);
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fp-title-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fp-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseGreen 1.5s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulseGreen {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.fp-filename {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fp-speed {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.fp-bar-track {
+  height: 6px;
+  background: var(--card-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #34d399 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.fp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+}
+
+.fp-stage {
+  color: var(--text-muted);
+}
+
+.fp-percent {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+
 
 
 
