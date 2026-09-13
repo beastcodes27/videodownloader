@@ -256,6 +256,7 @@ body {
 
 .main-search-input {
   flex: 1;
+  min-width: 0;
   padding: 14px 16px;
   border: none;
   background: transparent;
@@ -278,7 +279,8 @@ body {
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  margin-right: 8px;
+  margin-right: 6px;
+  flex-shrink: 0;
   transition: all 0.15s;
 }
 
@@ -291,6 +293,7 @@ body {
 .main-download-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 14px 28px;
   background: var(--primary);
@@ -303,6 +306,30 @@ body {
   box-shadow: var(--primary-shadow);
   transition: background 0.15s, transform 0.1s;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 540px) {
+  .search-input-group {
+    flex-wrap: wrap;
+    padding: 6px;
+    gap: 6px;
+  }
+  .main-search-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+  .main-download-btn {
+    width: 100%;
+    padding: 12px 16px;
+    justify-content: center;
+  }
+  .search-paste-btn,
+  .search-clear-btn {
+    margin-right: 0;
+    margin-left: auto;
+  }
 }
 
 .main-download-btn:hover:not(:disabled) {
