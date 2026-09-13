@@ -49,10 +49,18 @@ function App() {
   };
 
   const sanitizeInputUrl = (input) => {
-    if (!input) return '';
+    if (!input || typeof input !== 'string') return '';
     let cleaned = input.trim();
+    if (!/^https?:\/\//i.test(cleaned)) {
+      if (/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/i.test(cleaned)) {
+        cleaned = `https://${cleaned}`;
+      }
+    }
     try {
       const parsed = new URL(cleaned);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return '';
+      }
       ['si', 'feature', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid'].forEach((p) => {
         parsed.searchParams.delete(p);
       });
@@ -77,26 +85,27 @@ function App() {
   };
 
   const fetchInfoForUrl = async (targetUrl) => {
-    const cleanUrl = sanitizeInputUrl(targetUrl || url);
+    const raw = targetUrl !== undefined ? targetUrl : url;
+    const cleanUrl = sanitizeInputUrl(raw);
     if (!cleanUrl) {
-      setError('Please enter a valid video, audio, or image URL');
+      setError('Please enter a valid HTTP or HTTPS media URL');
       return;
     }
 
     if (platform === 'youtube' && !/youtube\.com|youtu\.be/i.test(cleanUrl)) {
-      setError('Please enter a valid YouTube URL');
+      setError('Please enter a valid YouTube URL (e.g., youtube.com/watch?v=... or youtu.be/...)');
       return;
     }
     if (platform === 'tiktok' && !/tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(cleanUrl)) {
-      setError('Please enter a valid TikTok URL');
+      setError('Please enter a valid TikTok video or slideshow URL');
       return;
     }
     if (platform === 'facebook' && !/facebook\.com|fb\.watch|fb\.com|fb\.gg/i.test(cleanUrl)) {
-      setError('Please enter a valid Facebook URL');
+      setError('Please enter a valid Facebook video, reel, or photo URL');
       return;
     }
     if (platform === 'instagram' && !/instagram\.com/i.test(cleanUrl)) {
-      setError('Please enter a valid Instagram URL');
+      setError('Please enter a valid Instagram reel or post URL');
       return;
     }
     if (platform === 'twitter' && !/twitter\.com|x\.com/i.test(cleanUrl)) {
