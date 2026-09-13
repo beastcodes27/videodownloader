@@ -183,10 +183,11 @@ function App() {
   };
 
   const formatDuration = (s) => {
-    if (!s || isNaN(s)) return '0:00';
+    if (s === null || s === undefined || isNaN(s) || s < 0) return '';
+    if (s === 0) return '0:00';
     const hrs = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
+    const sec = Math.floor(s % 60);
     if (hrs > 0) {
       return `${hrs}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
     }
@@ -194,9 +195,14 @@ function App() {
   };
 
   const formatSize = (bytes) => {
-    if (!bytes || bytes <= 0) return '';
-    const mb = (bytes / 1024 / 1024).toFixed(1);
-    return `~${mb} MB`;
+    if (!bytes || bytes <= 0 || isNaN(bytes)) return '';
+    if (bytes >= 1024 * 1024 * 1024) {
+      return `~${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    }
+    if (bytes >= 1024 * 1024) {
+      return `~${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    return `~${Math.round(bytes / 1024)} KB`;
   };
 
   const faqs = [
