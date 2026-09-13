@@ -982,3 +982,28 @@ body {
   font-size: 0.75rem;
   color: var(--text-sub);
 }
+
+@media (max-width: 600px) {
+  .policy-page {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+  .policy-title {
+    font-size: 1.35rem;
+  }
+  .policy-section h2 {
+    font-size: 0.95rem;
+  }
+  .policy-section p,
+  .policy-section li {
+    font-size: 0.84rem;
+  }
+  .footer-top {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  .footer-nav {
+    justify-content: center;
+  }
+}
