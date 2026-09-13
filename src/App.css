@@ -1593,5 +1593,75 @@ body {
   background: var(--primary-hover);
 }
 
+/* Audio Bitrate Selector Bar */
+.audio-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audio-bitrate-bar {
+  background: var(--card-hover);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bitrate-bar-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.bitrate-pills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.bitrate-quick-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-main);
+}
+
+.bitrate-quick-pill:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.bitrate-quick-pill .pill-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.bitrate-quick-pill .pill-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bitrate-quick-pill.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+
 
 

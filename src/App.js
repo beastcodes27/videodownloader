@@ -205,22 +205,23 @@ function App() {
   };
 
   const handleDownload = (opts) => {
-    const { quality, formatId, mode, ext } = opts;
-    const downloadKey = formatId || quality;
+    const { quality, formatId, mode, ext, bitrate } = opts;
+    const downloadKey = bitrate ? `audio_${bitrate}` : (formatId || quality);
     setDownloading(downloadKey);
 
     const params = new URLSearchParams({
       url: sanitizeInputUrl(url),
-      mode: mode || (formatId ? 'audio' : 'video'),
+      mode: mode || (formatId || bitrate ? 'audio' : 'video'),
     });
 
     if (quality) params.append('quality', quality);
     if (formatId) params.append('formatId', formatId);
+    if (bitrate) params.append('bitrate', bitrate);
 
     const a = document.createElement('a');
     a.href = `/api/download?${params.toString()}`;
     const safeTitle = (info?.title || 'download').slice(0, 40).replace(/[^\w\d-_]/g, '_');
-    a.download = `${safeTitle}.${ext || (mode === 'audio' ? 'mp3' : 'mp4')}`;
+    a.download = `${safeTitle}.${ext || (mode === 'audio' || bitrate ? 'mp3' : 'mp4')}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -589,31 +590,56 @@ function App() {
                       )}
 
                       {tab === 'audio' && (
-                        info.audioOptions?.map((a, i) => (
-                          <div key={i} className="format-row">
-                            <div className="format-row-left">
-                              <span className="badge-quality audio">{a.quality || 'MP3'}</span>
-                              <span className="format-subtext">{a.label}</span>
+                        <div className="audio-tab-container">
+                          <div className="audio-bitrate-bar">
+                            <span className="bitrate-bar-label">Quick Quality Presets:</span>
+                            <div className="bitrate-pills">
+                              {[
+                                { label: '320 kbps (Studio Master)', val: '320k', badge: 'Ultra HQ' },
+                                { label: '256 kbps (High Fidelity)', val: '256k', badge: 'HQ' },
+                                { label: '192 kbps (Standard)', val: '192k', badge: 'Standard' },
+                                { label: '128 kbps (Compact)', val: '128k', badge: 'Fast' },
+                              ].map((b) => (
+                                <button
+                                  key={b.val}
+                                  className={`bitrate-quick-pill ${downloading === `audio_${b.val}` ? 'loading' : ''}`}
+                                  onClick={() => handleDownload({ bitrate: b.val, mode: 'audio', ext: 'mp3' })}
+                                >
+                                  <span className="pill-val">{b.val}</span>
+                                  <span className="pill-badge">{b.badge}</span>
+                                </button>
+                              ))}
                             </div>
-                            <button
-                              className={`row-dl-btn audio ${downloading === a.formatId ? 'loading' : ''}`}
-                              onClick={() => handleDownload({ formatId: a.formatId, mode: 'audio', ext: a.ext })}
-                            >
-                              {downloading === a.formatId ? (
-                                <span className="btn-spinner-white" />
-                              ) : (
-                                <>
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                    <polyline points="7 10 12 15 17 10" />
-                                    <line x1="12" y1="15" x2="12" y2="3" />
-                                  </svg>
-                                  <span>Download MP3</span>
-                                </>
-                              )}
-                            </button>
                           </div>
-                        ))
+
+                          <div className="audio-format-list">
+                            {info.audioOptions?.map((a, i) => (
+                              <div key={i} className="format-row">
+                                <div className="format-row-left">
+                                  <span className="badge-quality audio">{a.quality || 'MP3'}</span>
+                                  <span className="format-subtext">{a.label}</span>
+                                </div>
+                                <button
+                                  className={`row-dl-btn audio ${downloading === a.formatId ? 'loading' : ''}`}
+                                  onClick={() => handleDownload({ formatId: a.formatId, mode: 'audio', ext: a.ext })}
+                                >
+                                  {downloading === a.formatId ? (
+                                    <span className="btn-spinner-white" />
+                                  ) : (
+                                    <>
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                      </svg>
+                                      <span>Download MP3</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
 
                       {tab === 'photos' && (

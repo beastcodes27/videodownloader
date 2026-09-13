@@ -440,14 +440,18 @@ function fetchInfo(url, timeoutMs = 45000) {
 /**
  * Build yt-dlp arguments for downloading video or audio
  */
-function buildDownloadArgs({ url, mode, quality, formatId, outTmpl }) {
+function buildDownloadArgs({ url, mode, quality, formatId, bitrate, outTmpl }) {
   const cleanUrl = sanitizeUrl(url);
   const args = [...getBaseArgs(), '-o', outTmpl, '--no-part', '--no-progress'];
 
   if (mode === 'audio') {
     // Audio extraction
-    if (formatId === 'mp3_320') {
+    if (bitrate) {
+      args.push('-x', '--audio-format', 'mp3', '--audio-quality', `${bitrate.toString().replace(/[^0-9kK]/g, '')}`);
+    } else if (formatId === 'mp3_320') {
       args.push('-x', '--audio-format', 'mp3', '--audio-quality', '320K');
+    } else if (formatId === 'mp3_256') {
+      args.push('-x', '--audio-format', 'mp3', '--audio-quality', '256K');
     } else if (formatId === 'mp3_192') {
       args.push('-x', '--audio-format', 'mp3', '--audio-quality', '192K');
     } else if (formatId === 'mp3_128') {

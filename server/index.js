@@ -61,7 +61,7 @@ app.get('/api/download', async (req, res) => {
   let proc = null;
 
   try {
-    const { url, quality, formatId, mode } = req.query;
+    const { url, quality, formatId, mode, bitrate } = req.query;
     if (!url || typeof url !== 'string') {
       return res.status(400).json({ error: 'URL parameter is required' });
     }
@@ -69,7 +69,7 @@ app.get('/api/download', async (req, res) => {
       return res.status(400).json({ error: 'URL is too long (max 2048 characters)' });
     }
 
-    const isAudioMode = mode === 'audio' || Boolean(formatId && formatId.startsWith('mp3_')) || formatId === 'source_audio';
+    const isAudioMode = mode === 'audio' || Boolean(formatId && formatId.startsWith('mp3_')) || formatId === 'source_audio' || Boolean(bitrate);
     const downloadMode = isAudioMode ? 'audio' : 'video';
 
     // Create unique temporary directory
@@ -82,6 +82,7 @@ app.get('/api/download', async (req, res) => {
       mode: downloadMode,
       quality,
       formatId,
+      bitrate,
       outTmpl,
     });
 
