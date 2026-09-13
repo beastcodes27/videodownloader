@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsOfService from './TermsOfService';
+import VideoPlayerModal from './VideoPlayerModal';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [tab, setTab] = useState('video');
   const [page, setPage] = useState('home');
   const [activeFaq, setActiveFaq] = useState(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('saveit_theme') || 'light';
   });
@@ -404,19 +406,36 @@ function App() {
               {/* Result Video Card (SSYouTube Style) */}
               {info && (
                 <div id="result-card" className="ss-card result-box">
-                  <div className="result-thumb-wrapper">
+                  <div className="result-thumb-wrapper" onClick={() => setShowPreviewModal(true)} title="Click to preview">
                     {info.thumbnail ? (
                       <img src={info.thumbnail} alt={info.title} className="result-thumb-img" />
                     ) : (
                       <div className="no-thumbnail-box">Media</div>
                     )}
+                    <div className="thumb-play-hover">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </div>
                     {info.duration > 0 && (
                       <span className="duration-badge">{formatDuration(info.duration)}</span>
                     )}
                   </div>
 
                   <div className="result-details">
-                    <h2 className="result-title" title={info.title}>{info.title}</h2>
+                    <div className="result-header-row">
+                      <h2 className="result-title" title={info.title}>{info.title}</h2>
+                      <button
+                        className="preview-trigger-btn"
+                        onClick={() => setShowPreviewModal(true)}
+                        title="Preview media modal"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        <span>Preview</span>
+                      </button>
+                    </div>
                     <div className="result-meta">
                       <span className="author-tag">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -653,6 +672,13 @@ function App() {
                 </div>
               </footer>
             </>
+          )}
+
+          {showPreviewModal && info && (
+            <VideoPlayerModal
+              info={info}
+              onClose={() => setShowPreviewModal(false)}
+            />
           )}
         </div>
       </main>
