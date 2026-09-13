@@ -30,6 +30,7 @@ function App() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showAccentPicker, setShowAccentPicker] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [accent, setAccent] = useState(() => {
     return localStorage.getItem('saveit_accent') || 'emerald';
   });
@@ -157,6 +158,33 @@ function App() {
       }
     } catch {
       // clipboard permission denied or not available
+    }
+  };
+
+  const handleCopyCleanLink = async () => {
+    const clean = sanitizeInputUrl(url || info?.originalUrl || info?.url);
+    if (!clean) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(clean);
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      }
+    } catch {}
+  };
+
+  const handleNativeShare = async () => {
+    const clean = sanitizeInputUrl(url || info?.originalUrl || info?.url);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: info?.title || 'SaveIt Media Downloader',
+          text: `Download "${info?.title || 'media'}" with SaveIt:`,
+          url: clean || window.location.href,
+        });
+      } catch {}
+    } else {
+      handleCopyCleanLink();
     }
   };
 
@@ -674,6 +702,35 @@ function App() {
                       {info.platform && (
                         <span className="platform-pill">{info.platform.toUpperCase()}</span>
                       )}
+
+                      <div className="result-share-bar">
+                        <button
+                          className={`share-mini-btn ${copiedLink ? 'copied' : ''}`}
+                          onClick={handleCopyCleanLink}
+                          title="Copy clean direct media link"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                          <span>{copiedLink ? 'Clean Link Copied!' : 'Copy Link'}</span>
+                        </button>
+
+                        <button
+                          className="share-mini-btn"
+                          onClick={handleNativeShare}
+                          title="Share to friends"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="18" cy="5" r="3" />
+                            <circle cx="6" cy="12" r="3" />
+                            <circle cx="18" cy="19" r="3" />
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                          </svg>
+                          <span>Share</span>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Format Tabs */}
