@@ -177,6 +177,34 @@ function detectPlatform(url) {
   return 'generic';
 }
 
+function formatExtractorError(rawStderr, code) {
+  const err = (rawStderr || '').toLowerCase();
+  if (err.includes('private video') || err.includes('is private')) {
+    return 'This video is private and cannot be downloaded.';
+  }
+  if (err.includes('sign in') || err.includes('confirm you\'re not a bot') || err.includes('bot detection')) {
+    return 'The host platform temporarily requested bot verification. Please try again in a moment.';
+  }
+  if (err.includes('video unavailable') || err.includes('not available') || err.includes('has been removed')) {
+    return 'The requested video is unavailable, deleted, or restricted by region.';
+  }
+  if (err.includes('unsupported url') || err.includes('is not a valid url')) {
+    return 'The provided link is not recognized or supported. Please check the URL.';
+  }
+  if (err.includes('http error 403') || err.includes('forbidden')) {
+    return 'Access was temporarily rate-limited by the host server. Please retry in a few seconds.';
+  }
+  if (err.includes('login required') || err.includes('members-only')) {
+    return 'This content requires a member account or login credentials.';
+  }
+  const clean = rawStderr
+    .split('\n')
+    .filter(l => l.includes('ERROR:') || l.includes('Error:'))
+    .join(' ')
+    .replace(/^ERROR:\s*/i, '');
+  return clean || (code ? `Extraction error (code ${code})` : 'Unable to extract video information');
+}
+
 /**
  * Fetch video metadata and available formats safely and asynchronously
  */
@@ -228,11 +256,7 @@ function fetchInfo(url, timeoutMs = 45000) {
       if (timedOut) return;
 
       if (code !== 0) {
-        const cleanErr = stderr
-          .split('\n')
-          .filter(l => l.includes('ERROR:') || l.includes('Error:') || l.includes('Sign in'))
-          .join(' ') || stderr.slice(-300);
-        return reject(new Error(cleanErr || `yt-dlp exited with code ${code}`));
+        return reject(new Error(formatExtractorError(stderr, code)));
       }
 
       try {
