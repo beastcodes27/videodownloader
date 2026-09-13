@@ -5,6 +5,7 @@ import VideoPlayerModal from './VideoPlayerModal';
 import DownloadHistory from './DownloadHistory';
 import QRCodeModal from './QRCodeModal';
 import BatchDownloader from './BatchDownloader';
+import ShortcutsModal from './ShortcutsModal';
 import './App.css';
 
 const ACCENT_COLORS = [
@@ -30,6 +31,7 @@ function App() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showAccentPicker, setShowAccentPicker] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [accent, setAccent] = useState(() => {
     return localStorage.getItem('saveit_accent') || 'emerald';
@@ -102,6 +104,48 @@ function App() {
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+
+      if (e.key === 'Escape') {
+        setShowPreviewModal(false);
+        setShowHistoryModal(false);
+        setShowQrModal(false);
+        setShowBatchModal(false);
+        setShowShortcutsModal(false);
+        setShowAccentPicker(false);
+        return;
+      }
+
+      if (isInput) return;
+
+      if (e.key === '/') {
+        e.preventDefault();
+        const searchInput = document.querySelector('.main-search-input');
+        if (searchInput) searchInput.focus();
+      } else if (e.altKey && (e.key === 'h' || e.key === 'H')) {
+        e.preventDefault();
+        setShowHistoryModal((prev) => !prev);
+      } else if (e.altKey && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        setShowBatchModal((prev) => !prev);
+      } else if (e.altKey && (e.key === 't' || e.key === 'T')) {
+        e.preventDefault();
+        setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+      } else if (e.altKey && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        if (info) setShowPreviewModal((prev) => !prev);
+      } else if (e.key === '?' || (e.ctrlKey && e.key === '/')) {
+        e.preventDefault();
+        setShowShortcutsModal((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [info]);
 
   useEffect(() => {
     const handleHash = () => {
@@ -969,6 +1013,7 @@ function App() {
                     <p className="footer-tagline">Fast & Free Online Video, Audio & Photo Downloader</p>
                   </div>
                   <div className="footer-nav">
+                    <button className="fnav-link" onClick={() => setShowShortcutsModal(true)}>Shortcuts (?)</button>
                     <button className="fnav-link" onClick={() => navigateTo('privacy')}>Privacy Policy</button>
                     <button className="fnav-link" onClick={() => navigateTo('terms')}>Terms of Service</button>
                   </div>
@@ -1015,6 +1060,11 @@ function App() {
             isOpen={showBatchModal}
             onClose={() => setShowBatchModal(false)}
             onAddHistoryItem={addToHistory}
+          />
+
+          <ShortcutsModal
+            isOpen={showShortcutsModal}
+            onClose={() => setShowShortcutsModal(false)}
           />
 
           {downloadProgress && (

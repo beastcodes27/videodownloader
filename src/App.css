@@ -2124,6 +2124,59 @@ body {
   color: var(--primary);
 }
 
+/* Shortcuts Modal */
+.shortcuts-modal {
+  max-width: 520px;
+}
+
+.shortcuts-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.shortcuts-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.shortcuts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--card-hover);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+}
+
+.shortcut-label {
+  font-size: 0.82rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.shortcut-kbd {
+  background: var(--card-bg);
+  border: 1px solid var(--input-border);
+  box-shadow: 0 2px 0 var(--card-border);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+
 
 
 
