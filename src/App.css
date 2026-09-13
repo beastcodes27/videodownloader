@@ -789,8 +789,39 @@ body {
 
 .supported-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .step-card {
+    padding: 18px 14px;
+  }
+  .supported-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .supported-card {
+    padding: 14px 10px;
+  }
+  .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .icon-circle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .section-heading {
+    font-size: 1.35rem;
+    margin-bottom: 18px;
+  }
 }
 
 .supported-card {
