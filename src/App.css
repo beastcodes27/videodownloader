@@ -90,7 +90,7 @@ body {
   color: rgba(255, 255, 255, 0.25);
 }
 
-.search-box button {
+.search-box button.get-btn {
   padding: 10px 24px;
   border: none;
   border-radius: 10px;
@@ -103,11 +103,11 @@ body {
   white-space: nowrap;
 }
 
-.search-box button:active:not(:disabled) {
+.search-box button.get-btn:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-.search-box button:disabled {
+.search-box button.get-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   display: flex;
@@ -116,8 +116,23 @@ body {
   gap: 8px;
 }
 
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.clear-btn:hover {
+  color: #fff;
+}
+
 .platform-menu {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
   justify-content: center;
@@ -127,12 +142,12 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 24px;
+  padding: 9px 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -140,26 +155,48 @@ body {
 
 .platform-btn:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .platform-btn.active {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(247, 151, 30, 0.4);
 }
 
 .platform-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
-.platform-btn.active:first-child svg {
-  color: #ff0000;
+.platform-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.platform-btn.active:last-child svg {
-  color: #25f4ee;
+.no-thumbnail {
+  width: 200px;
+  height: 112px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.no-formats {
+  text-align: center;
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
 }
 
 @keyframes spin {

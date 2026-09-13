@@ -11,6 +11,10 @@
 # production
 /build
 
+# server downloads & binary cache
+server/dl-*
+server/bin/
+
 # misc
 .DS_Store
 .env.local

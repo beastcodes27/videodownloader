@@ -1,9 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const { execSync, spawn } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const ffmpegPath = require('ffmpeg-static');
+const {
+  getYtDlpPath,
+  ensureYtDlpBinary,
+  fetchInfo,
+  buildDownloadArgs,
+  sanitizeUrl,
+} = require('./ytdlp');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -11,127 +17,170 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// Clean up any stale temp directories on startup
+try {
+  const serverDir = __dirname;
+  const entries = fs.readdirSync(serverDir);
+  for (const entry of entries) {
+    if (entry.startsWith('dl-')) {
+      const fullPath = path.join(serverDir, entry);
+      fs.rmSync(fullPath, { recursive: true, force: true });
+    }
+  }
+} catch (e) {
+  console.warn('Initial temp cleanup warning:', e.message);
+}
+
+// Serve static build files
 app.use(express.static(path.join(__dirname, '..', 'build')));
 
-const isTikTok = (url) =>
-  /tiktok\.com/i.test(url) || /vm\.tiktok/i.test(url);
-
-app.get('/api/info', (req, res) => {
+// API: Fetch video & audio info
+app.get('/api/info', async (req, res) => {
   try {
     const { url } = req.query;
-    if (!url) return res.status(400).json({ error: 'URL is required' });
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
 
-    const raw = execSync(`yt-dlp --dump-json --no-download "${url}"`, {
-      encoding: 'utf-8',
-      maxBuffer: 10 * 1024 * 1024,
-    });
-    const data = JSON.parse(raw);
-
-    const tik = isTikTok(url);
-
-    const formats = (data.formats || []).map(f => {
-      let quality = f.format_note || f.resolution || f.abr || 'unknown';
-      if (tik && !quality || quality === 'None') {
-        const m = f.format_id.match(/_(\d+p)_/);
-        quality = m ? m[1] : f.resolution || 'unknown';
-      }
-      return {
-        formatId: f.format_id,
-        quality,
-        ext: f.ext,
-        hasVideo: f.vcodec && f.vcodec !== 'none',
-        hasAudio: f.acodec && f.acodec !== 'none',
-        filesize: f.filesize || f.filesize_approx || null,
-        tbr: f.tbr,
-      };
-    });
-
-    res.json({
-      title: data.title,
-      thumbnail: data.thumbnail,
-      duration: data.duration,
-      author: data.uploader || data.channel,
-      formats,
-      isTikTok: tik,
-    });
+    const info = await fetchInfo(url);
+    res.json(info);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Info extraction error:', err.message);
+    res.status(500).json({ error: err.message || 'Failed to fetch video info' });
   }
 });
 
-app.get('/api/download', (req, res) => {
+// API: Download video or audio
+app.get('/api/download', async (req, res) => {
+  let tmpDir = null;
+  let proc = null;
+
   try {
-    const { url, quality, formatId } = req.query;
-    if (!url) return res.status(400).json({ error: 'URL is required' });
-
-    const tmpDir = fs.mkdtempSync(path.join(__dirname, 'dl-'));
-    const outTmpl = path.join(tmpDir, '%(title)s.%(ext)s');
-
-    let format;
-    let label;
-
-    if (formatId) {
-      format = formatId;
-      label = 'audio';
-    } else if (quality) {
-      if (isTikTok(url)) {
-        format = `best[height<=${quality.replace('p', '')}]`;
-      } else {
-        const height = quality.replace('p', '');
-        format = `bestvideo[height<=${height}]+bestaudio/best[height<=${height}]`;
-      }
-      label = quality;
-    } else {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-      return res.status(400).json({ error: 'quality or formatId required' });
+    const { url, quality, formatId, mode } = req.query;
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
     }
 
-    const proc = spawn('yt-dlp', [
-      '-f', format,
-      '--ffmpeg-location', ffmpegPath,
-      '-o', outTmpl,
-      '--no-part',
-      '--no-progress',
-      '--merge-output-format', 'mp4',
-      '--print', 'after_move:filename',
-      url,
-    ]);
+    const isAudioMode = mode === 'audio' || Boolean(formatId && formatId.startsWith('mp3_')) || formatId === 'source_audio';
+    const downloadMode = isAudioMode ? 'audio' : 'video';
 
-    let output = '';
-    let errorOutput = '';
-    proc.stdout.on('data', (chunk) => { output += chunk.toString(); });
-    proc.stderr.on('data', (chunk) => { errorOutput += chunk.toString(); });
+    // Create unique temporary directory
+    tmpDir = fs.mkdtempSync(path.join(__dirname, 'dl-'));
+    const outTmpl = path.join(tmpDir, '%(title).100B.%(ext)s');
+
+    const ytDlp = getYtDlpPath();
+    const args = buildDownloadArgs({
+      url,
+      mode: downloadMode,
+      quality,
+      formatId,
+      outTmpl,
+    });
+
+    proc = spawn(ytDlp, args);
+
+    let stdout = '';
+    let stderr = '';
+
+    proc.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    proc.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    // Handle client disconnect / cancellation
+    req.on('close', () => {
+      if (proc && !proc.killed) {
+        try {
+          proc.kill('SIGKILL');
+        } catch {}
+      }
+      setTimeout(() => {
+        if (tmpDir && fs.existsSync(tmpDir)) {
+          try {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+          } catch {}
+        }
+      }, 3000);
+    });
 
     proc.on('close', (code) => {
       if (code !== 0) {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-        return res.status(500).json({ error: `Download failed: ${errorOutput.slice(0, 300)}` });
+        if (tmpDir && fs.existsSync(tmpDir)) {
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+        const cleanErr = stderr
+          .split('\n')
+          .filter(l => l.includes('ERROR:') || l.includes('Error:'))
+          .join(' ') || stderr.slice(-300);
+        return res.status(500).json({ error: `Download failed: ${cleanErr || 'Process exited with code ' + code}` });
       }
+
       const files = fs.readdirSync(tmpDir);
       if (files.length === 0) {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-        return res.status(500).json({ error: 'File not found after download' });
+        if (tmpDir && fs.existsSync(tmpDir)) {
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+        return res.status(500).json({ error: 'Downloaded file not found' });
       }
-      const filePath = path.join(tmpDir, files[0]);
-      res.download(filePath, (err) => {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-        if (err) console.error('Send error:', err);
+
+      const fileName = files[0];
+      const filePath = path.join(tmpDir, fileName);
+
+      // Safe ASCII fallback name and RFC 5987 encoded name
+      const safeAsciiName = fileName.replace(/[^\w\d._-]/g, '_');
+      const encodedName = encodeURIComponent(fileName).replace(/['()]/g, escape).replace(/\*/g, '%2A');
+
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${safeAsciiName}"; filename*=UTF-8''${encodedName}`
+      );
+
+      res.download(filePath, fileName, (downloadErr) => {
+        if (tmpDir && fs.existsSync(tmpDir)) {
+          try {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+          } catch {}
+        }
+        if (downloadErr && !res.headersSent) {
+          console.error('Send error:', downloadErr);
+        }
       });
     });
 
-    req.on('close', () => {
-      proc.kill();
-      setTimeout(() => {
-        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
-      }, 5000);
+    proc.on('error', (err) => {
+      if (tmpDir && fs.existsSync(tmpDir)) {
+        try {
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+        } catch {}
+      }
+      if (!res.headersSent) {
+        res.status(500).json({ error: `Process launch failed: ${err.message}` });
+      }
     });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (tmpDir && fs.existsSync(tmpDir)) {
+      try {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      } catch {}
+    }
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 
+// Fallback to client routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+ensureYtDlpBinary().then(() => {
+  app.listen(PORT, () => console.log(`SaveVideo server running on http://localhost:${PORT}`));
+}).catch((err) => {
+  console.warn('Startup binary check warning:', err.message);
+  app.listen(PORT, () => console.log(`SaveVideo server running on http://localhost:${PORT}`));
+});
