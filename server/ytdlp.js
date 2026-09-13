@@ -111,10 +111,10 @@ function sanitizeUrl(rawUrl) {
 function detectPlatform(url) {
   const u = url.toLowerCase();
   if (/youtube\.com|youtu\.be/i.test(u)) return 'youtube';
-  if (/tiktok\.com|vm\.tiktok/i.test(u)) return 'tiktok';
+  if (/tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(u)) return 'tiktok';
+  if (/facebook\.com|fb\.watch|fb\.com|fb\.gg/i.test(u)) return 'facebook';
   if (/instagram\.com/i.test(u)) return 'instagram';
   if (/twitter\.com|x\.com/i.test(u)) return 'twitter';
-  if (/facebook\.com|fb\.watch/i.test(u)) return 'facebook';
   if (/reddit\.com/i.test(u)) return 'reddit';
   if (/vimeo\.com/i.test(u)) return 'vimeo';
   return 'generic';
@@ -183,13 +183,27 @@ function fetchInfo(url, timeoutMs = 45000) {
         const videoFormats = [];
         const seenHeights = new Set();
         
-        // Filter video streams with height
+        // Filter video streams with height or format note (Facebook HD / SD)
         const validVideoStreams = rawFormats
-          .filter(f => (f.height || f.resolution) && f.vcodec && f.vcodec !== 'none')
+          .filter(f => {
+            const hasVideo = f.vcodec && f.vcodec !== 'none';
+            const hasDirectVideo = !f.vcodec && f.ext === 'mp4' && !f.format_id?.includes('audio');
+            return hasVideo || hasDirectVideo || f.height || f.resolution;
+          })
           .sort((a, b) => (b.height || 0) - (a.height || 0));
 
         for (const f of validVideoStreams) {
-          const height = f.height || parseInt(f.resolution, 10);
+          let height = f.height || (f.resolution ? parseInt(f.resolution, 10) : null);
+          const note = ((f.format_note || '') + ' ' + (f.format_id || '')).toLowerCase();
+
+          if (!height) {
+            if (note.includes('hd') || note.includes('1080') || note.includes('720')) {
+              height = note.includes('1080') ? 1080 : 720;
+            } else if (note.includes('sd') || note.includes('480') || note.includes('360')) {
+              height = note.includes('360') ? 360 : 480;
+            }
+          }
+
           if (height && !seenHeights.has(height)) {
             seenHeights.add(height);
             let label = `${height}p`;
@@ -197,7 +211,7 @@ function fetchInfo(url, timeoutMs = 45000) {
             else if (height >= 1440) label = '2K (1440p)';
             else if (height >= 1080) label = '1080p Full HD';
             else if (height >= 720) label = '720p HD';
-            else if (height >= 480) label = '480p';
+            else if (height >= 480) label = '480p SD';
             else if (height >= 360) label = '360p';
 
             videoFormats.push({
@@ -212,12 +226,12 @@ function fetchInfo(url, timeoutMs = 45000) {
           }
         }
 
-        // If no distinct video streams found (e.g. some direct TikTok or generic streams)
+        // If no distinct video streams found (e.g. direct Facebook SD/HD or direct URL)
         if (videoFormats.length === 0) {
           videoFormats.push({
             height: 720,
             quality: 'best',
-            label: 'Best Quality',
+            label: 'HD / Best Quality',
             ext: 'mp4',
             filesize: data.filesize || data.filesize_approx || null,
             tbr: null,

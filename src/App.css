@@ -169,6 +169,18 @@ body {
   height: 16px;
 }
 
+.platform-btn.active:nth-child(2) svg {
+  color: #ff0000;
+}
+
+.platform-btn.active:nth-child(3) svg {
+  color: #25f4ee;
+}
+
+.platform-btn.active:nth-child(4) svg {
+  color: #1877f2;
+}
+
 .platform-tag {
   font-size: 0.7rem;
   font-weight: 700;
