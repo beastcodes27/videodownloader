@@ -4,27 +4,30 @@
   <img src="public/logo192.png" width="80" height="80" alt="SaveIt Logo" />
 </p>
 
-SaveIt is a fast, modern, and reliable online media downloader inspired by SSYouTube. It enables users to download high-definition videos (up to 4K), extract high-bitrate MP3 audio (up to 320 kbps), and download photos and slideshows from various social platforms with zero ads or paywalls.
+**SaveIt** is a fast, modern, and reliable online media downloader inspired by SSYouTube. It enables users to download high-definition videos (up to 4K), extract high-bitrate MP3 audio (up to 320 kbps), and download photos and slideshows from multiple social platforms with zero ads or paywalls.
 
 ---
 
-## ✨ Features
+## ✨ Features & Capabilities
 
-- **Multi-Platform Support**: Download from **YouTube** (Videos, Shorts, Music), **TikTok** (Without watermark & Photo mode), **Facebook** (Reels & Videos), **Instagram** (Posts & Reels), **Twitter/X**, and direct media links.
-- **Dynamic Format Selection**:
-  - **Video**: 4K (2160p), 2K (1440p), 1080p Full HD, 720p HD, 480p, 360p (MP4).
-  - **Audio**: MP3 320 kbps (High Quality), 192 kbps (Standard), 128 kbps (Compact), and Source Audio.
-  - **Photos**: Direct high-res photo downloads and TikTok/Instagram slideshow extractions.
-- **SSYouTube-Inspired UI**:
-  - Clean light theme by default with a built-in Dark Mode toggle.
-  - One-click clipboard **Paste** button.
-  - Responsive layout optimized for smartphones, tablets, and desktops.
-  - Step-by-step guide, supported platform badges, and interactive FAQ accordion.
-- **Resilient Engine**:
-  - Standalone `yt-dlp` integration with automatic binary management.
-  - Non-blocking asynchronous child process execution.
-  - Automatic `ffmpeg` stream transcoding and container merging.
-  - Automatic transient temp file cleanup.
+- **Universal Multi-Platform Downloader**:
+  - **YouTube**: Standard videos, Shorts, Playlists & YouTube Music streams.
+  - **TikTok**: HD videos without watermark & Photo Slideshow extractions.
+  - **Facebook**: HD/SD reels, timeline videos & photos.
+  - **Instagram**: Reels, posts & photo carousels.
+  - **Twitter / X**: Video clips and direct GIFs.
+  - **Direct Links**: MP4, WebM, MP3, JPG, PNG URLs.
+
+- **Interactive Media Player Modal**: In-app preview modal allowing users to inspect video and audio metadata, duration, and cover before downloading.
+- **Download History & Bookmarks System**: Built-in client-side history drawer allowing users to bookmark favorite links, view timestamps, and 1-click re-download without retyping.
+- **Cross-Device Mobile QR Code Transfer**: Generate real-time QR codes on desktop so mobile devices can scan and instantly download media.
+- **High-Fidelity Audio Bitrate Customizer**: Instant bitrate preset switcher for MP3 conversions: 320 kbps (Studio Master), 256 kbps (High Fidelity), 192 kbps (Standard HQ), and 128 kbps (Compact/Fast).
+- **Batch Multi-Link Downloader**: Bulk queue processing that fetches metadata for multiple URLs concurrently and provides 1-click batch downloading.
+- **Live Download Progress & Network Speed Indicator**: Real-time simulated stream progress card with live transfer speed, progress bar, and status updates.
+- **Dynamic Accent Color Picker**: Choose between 5 theme accent palettes (Emerald, Cyber Blue, Royal Violet, Sunset Orange, Ruby Rose) with Dark/Light mode support.
+- **One-Click Clean Link Copy & Social Share**: Strip tracking parameters (`utm_`, `fbclid`, `si`) with 1-click clipboard copy and native Web Share integration.
+- **Power-User Keyboard Shortcuts**: Full hotkey navigation (`/` to focus, `Alt+H` for history, `Alt+B` for batch, `Alt+T` for theme toggle, `?` for cheatsheet, `Esc` to close).
+- **Progressive Web App (PWA) & Offline Shell**: Service worker caching and offline fallback for ultra-fast startup.
 
 ---
 
@@ -87,8 +90,8 @@ Extracts metadata, available video resolutions, audio bitrates, and photo stream
 }
 ```
 
-### 2. `GET /api/download?url=<media_url>&quality=<quality>&mode=<video|audio>`
-Downloads and streams the combined MP4 video or transcoded MP3 audio file.
+### 2. `GET /api/download?url=<media_url>&quality=<quality>&mode=<video|audio>&bitrate=<320k|256k|192k|128k>`
+Downloads and streams the combined MP4 video or transcoded MP3 audio file with custom bitrates.
 
 ### 3. `GET /api/download-image?url=<image_url>&filename=<filename>`
 Fetches and downloads photos, slideshows, or high-res thumbnails with sanitized Content-Disposition headers.
