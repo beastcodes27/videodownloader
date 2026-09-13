@@ -7,6 +7,14 @@ import QRCodeModal from './QRCodeModal';
 import BatchDownloader from './BatchDownloader';
 import './App.css';
 
+const ACCENT_COLORS = [
+  { id: 'emerald', name: 'Emerald', primary: '#10b981', hover: '#059669', light: '#ecfdf5', shadow: 'rgba(16, 185, 129, 0.35)' },
+  { id: 'blue', name: 'Cyber Blue', primary: '#3b82f6', hover: '#2563eb', light: '#eff6ff', shadow: 'rgba(59, 130, 246, 0.35)' },
+  { id: 'violet', name: 'Royal Violet', primary: '#8b5cf6', hover: '#7c3aed', light: '#f5f3ff', shadow: 'rgba(139, 92, 246, 0.35)' },
+  { id: 'orange', name: 'Sunset Orange', primary: '#f97316', hover: '#ea580c', light: '#fff7ed', shadow: 'rgba(249, 115, 22, 0.35)' },
+  { id: 'rose', name: 'Ruby Rose', primary: '#f43f5e', hover: '#e11d48', light: '#fff1f2', shadow: 'rgba(244, 63, 94, 0.35)' },
+];
+
 function App() {
   const [url, setUrl] = useState('');
   const [info, setInfo] = useState(null);
@@ -21,6 +29,10 @@ function App() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
+  const [showAccentPicker, setShowAccentPicker] = useState(false);
+  const [accent, setAccent] = useState(() => {
+    return localStorage.getItem('saveit_accent') || 'emerald';
+  });
   const [history, setHistory] = useState(() => {
     try {
       const saved = localStorage.getItem('saveit_history');
@@ -77,7 +89,14 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('saveit_theme', theme);
-  }, [theme]);
+
+    const pal = ACCENT_COLORS.find((c) => c.id === accent) || ACCENT_COLORS[0];
+    document.documentElement.style.setProperty('--primary', pal.primary);
+    document.documentElement.style.setProperty('--primary-hover', pal.hover);
+    document.documentElement.style.setProperty('--primary-light', theme === 'dark' ? `${pal.primary}25` : pal.light);
+    document.documentElement.style.setProperty('--primary-shadow', `0 4px 14px ${pal.shadow}`);
+    localStorage.setItem('saveit_accent', accent);
+  }, [theme, accent]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
@@ -407,6 +426,38 @@ function App() {
                 <span className="nav-count-badge">{history.length}</span>
               )}
             </button>
+
+            <div className="accent-picker-wrapper">
+              <button
+                className="theme-btn accent-trigger-btn"
+                onClick={() => setShowAccentPicker(!showAccentPicker)}
+                title="Customize Accent Color"
+              >
+                <span className="accent-swatch-current" />
+              </button>
+
+              {showAccentPicker && (
+                <div className="accent-dropdown-popover">
+                  <div className="accent-popover-title">Theme Accent</div>
+                  <div className="accent-swatches-grid">
+                    {ACCENT_COLORS.map((c) => (
+                      <button
+                        key={c.id}
+                        className={`swatch-btn ${accent === c.id ? 'active' : ''}`}
+                        style={{ backgroundColor: c.primary }}
+                        onClick={() => {
+                          setAccent(c.id);
+                          setShowAccentPicker(false);
+                        }}
+                        title={c.name}
+                      >
+                        {accent === c.id && <span className="swatch-check">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <button
               className="theme-btn"

@@ -2019,6 +2019,78 @@ body {
   color: var(--text-main);
 }
 
+/* Accent Color Picker Popover */
+.accent-picker-wrapper {
+  position: relative;
+}
+
+.accent-trigger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accent-swatch-current {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3px var(--primary);
+}
+
+.accent-dropdown-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 170px;
+  animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accent-popover-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.accent-swatches-grid {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.swatch-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  transition: transform 0.15s;
+}
+
+.swatch-btn:hover {
+  transform: scale(1.15);
+}
+
+.swatch-btn.active {
+  box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--primary);
+}
+
+
 
 
 
