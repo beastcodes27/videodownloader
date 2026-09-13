@@ -1662,6 +1662,246 @@ body {
   pointer-events: none;
 }
 
+/* Batch Downloader Modal */
+.batch-modal {
+  max-width: 680px;
+}
+
+.batch-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.batch-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.batch-textarea {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.batch-textarea:focus {
+  border-color: var(--primary);
+}
+
+.batch-action-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.batch-parse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.batch-parse-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.batch-parse-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.batch-results-wrapper {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.batch-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.batch-results-header h4 {
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.batch-group-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.batch-dl-all-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.batch-dl-all-btn.audio {
+  background: #2563eb;
+}
+
+.batch-dl-all-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.batch-item-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card-hover);
+  border: 1px solid var(--card-border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.batch-item-card.ready {
+  border-left: 3px solid var(--primary);
+}
+
+.batch-item-card.error {
+  border-left: 3px solid #ef4444;
+}
+
+.batch-thumb-mini {
+  width: 50px;
+  height: 34px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.batch-thumb-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.batch-thumb-placeholder {
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.batch-item-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.batch-platform-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.batch-item-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.batch-item-err {
+  font-size: 0.72rem;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+.batch-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.batch-mini-dl {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.batch-mini-dl:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.batch-mini-dl.audio:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.batch-err-badge {
+  font-size: 0.72rem;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.btn-spinner-green {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(16, 185, 129, 0.25);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+
 
 
 

@@ -4,6 +4,7 @@ import TermsOfService from './TermsOfService';
 import VideoPlayerModal from './VideoPlayerModal';
 import DownloadHistory from './DownloadHistory';
 import QRCodeModal from './QRCodeModal';
+import BatchDownloader from './BatchDownloader';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showBatchModal, setShowBatchModal] = useState(false);
   const [history, setHistory] = useState(() => {
     try {
       const saved = localStorage.getItem('saveit_history');
@@ -308,6 +310,18 @@ function App() {
           </div>
 
           <div className="nav-actions">
+            <button
+              className="nav-action-btn"
+              onClick={() => setShowBatchModal(true)}
+              title="Batch Multi-Link Downloader"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              </svg>
+              <span>Batch Mode</span>
+            </button>
+
             <button
               className="nav-action-btn"
               onClick={() => setShowHistoryModal(true)}
@@ -817,6 +831,12 @@ function App() {
               onClose={() => setShowQrModal(false)}
             />
           )}
+
+          <BatchDownloader
+            isOpen={showBatchModal}
+            onClose={() => setShowBatchModal(false)}
+            onAddHistoryItem={addToHistory}
+          />
         </div>
       </main>
     </div>
